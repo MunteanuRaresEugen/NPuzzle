@@ -25,22 +25,26 @@ public:
         openSet.push({ initialState, {} });
 
 		//TODO: define CLOSED SET correctly
-		std::set<State_t> closedSet;
-		//std::set<State_t, decltype(stateCompare)> closedSet(stateCompare);
+		//std::set<State_t> closedSet;
+
+        auto stateCompare = [](const State_t& first, const State_t& second) -> bool
+        {
+            return first.GetData() < second.GetData();
+        }; 
+
+		std::set<State_t, decltype(stateCompare)> closedSet(stateCompare);
+
+
 
         // TODO: Create a comparator so std::set can work with the State instances.
         // It doesn't really make sense to compare states otherwise...
-        //auto stateCompare = [](const State_t& first, const State_t& second) -> bool
-        //{
-        //    return first.GetData() < second.GetData();
-        //};
+       
 
         while (!openSet.empty())
         {
 			// TODO: Do it nicer , who is first? second? structure binding
             auto currentNode = openSet.front();            
-            auto&& currentState = currentNode.first;
-            auto&& currentMoves = currentNode.second;
+            auto&& [currentState, currentMoves ]= currentNode;
             openSet.pop();
 
             // some logging
@@ -63,10 +67,9 @@ public:
             for (auto&& childMovePair : currentState.GetChildren())
             {
 				//TODO: Do it nicer - who is first? second? 
-                auto&& childState = childMovePair.first;
-                MoveDirection move = childMovePair.second;
+                auto&& [childState, move] = childMovePair;
 
-				if(closedSet.find( childState) == closedSet.end()) // TODO: use C++20
+				if(!closedSet.contains( childState)) // TODO: use C++20
                 {
                     Moves childMoves = currentMoves;
                     childMoves.push_back(move);
@@ -82,7 +85,14 @@ private:
 	//musthaveTODO implement Validate correctly
     template <class State_t>
     static void Validate(const State_t& state)
-    {
-		return;
+    {   
+        if (!state.IsValid())
+        {
+            throw std::runtime_error("state not valid");
+        }
+        if (!state.IsSolvable())
+        {
+            throw std::runtime_error("state not solvable");
+        }
     }
 };
