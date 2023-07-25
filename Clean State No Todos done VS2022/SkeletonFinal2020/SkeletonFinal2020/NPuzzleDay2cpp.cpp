@@ -22,7 +22,7 @@ static void Test(const State<N>& initialState)
         }*/
 
         //std::copy(result.begin(), result.end(), std::ostream_iterator<MoveDirection>(std::cout), " ");
-        std::ranges::copy(result, std::ostream_iterator<MoveDirection>(std::cout), " "));
+        std::ranges::copy(result, std::ostream_iterator<MoveDirection>(std::cout, " "));
 
         /*for (auto& d : result)
         {
