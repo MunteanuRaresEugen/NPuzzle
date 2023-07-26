@@ -9,6 +9,28 @@
 #include<unordered_set>
 #include<math.h>
 
+template <class State_t>
+struct Heuristics
+{
+	static size_t GetManhattanDistance(const State_t& state)
+	{
+		size_t totaldistance = 0;
+		const auto& curentData = state.GetData();
+		for (size_t i = 0; i < curentData.size(); i++)
+		{
+			if (curentData[i] != 0)
+			{
+				size_t currentdistance = std::abs((int)state.GetPosition2D(i).second - (int)state.GetPosition2D(curentData[i] - 1).second) + std::abs((int)state.GetPosition2D(i).first - (int)state.GetPosition2D(curentData[i] - 1).first);
+				totaldistance += currentdistance;
+
+			}
+
+		}
+
+		return totaldistance;
+	}
+};
+
 class Solver
 {
 public:
@@ -24,7 +46,7 @@ public:
 
 		//TODO: define OPEN SET correctly
 		//std::queue<Node> openSet;
-		auto mDistance = [](const Node& node) -> int
+		/*auto mDistance = [](const Node& node) -> int
 		{
 			int totaldistance = 0;
 			const auto& currentstate = node.first;
@@ -35,17 +57,20 @@ public:
 				{
 					int currentdistance = std::abs((int)currentstate.GetPosition2D(i).second - (int)currentstate.GetPosition2D(curentData[i] - 1).second) + std::abs((int)currentstate.GetPosition2D(i).first - (int)currentstate.GetPosition2D(curentData[i] - 1).first);
 					totaldistance += currentdistance;
-					totaldistance += node.second.size();
+					
 				}
 				
 			}
+			totaldistance += node.second.size();
 
 			return totaldistance;
-		};
+		};*/
 		
 		auto nodeCompare = [&](const Node& first, const Node& second) -> bool
 		{
-			return mDistance(first) > mDistance(second);
+			auto firstHeuristic = Heuristics<State_t>::GetManhattanDistance(first.first) + first.second.size();
+			auto secondHeuristic = Heuristics<State_t>::GetManhattanDistance(second.first) + second.second.size();
+			return firstHeuristic > secondHeuristic;
 		};
 		std::priority_queue<Node,std::vector<Node>,decltype(nodeCompare)> openSet(nodeCompare);
 		openSet.push({ initialState, {} });
