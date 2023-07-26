@@ -7,6 +7,7 @@
 #include <set>
 #include <queue>
 #include<unordered_set>
+#include<math.h>
 
 class Solver
 {
@@ -22,7 +23,25 @@ public:
 		using Node = std::pair<State_t, Moves>;
 
 		//TODO: define OPEN SET correctly
-		std::queue<Node> openSet;
+		//std::queue<Node> openSet;
+		auto mDistance = [](const Node& node) -> int
+		{
+			int totaldistance = 0;
+			const auto& currentstate = node.first;
+			for (size_t i = 0; i < currentstate.GetData().size(); i++)
+			{
+				int currentdistance = std::abs((int)currentstate.GetPosition2D(i).second - (int)currentstate.GetPosition2D(currentstate.GetData()[i] - 1).second) + std::abs((int)currentstate.GetPosition2D(i).first - (int)currentstate.GetPosition2D(currentstate.GetData()[i] - 1).first);
+				totaldistance += currentdistance;
+			}
+
+			return totaldistance;
+		};
+		
+		auto nodeCompare = [&](const Node& first, const Node& second) -> bool
+		{
+			return mDistance(first) > mDistance(second);
+		};
+		std::priority_queue<Node,std::vector<Node>,decltype(nodeCompare)> openSet(nodeCompare);
 		openSet.push({ initialState, {} });
 
 		//TODO: define CLOSED SET correctly
@@ -32,6 +51,8 @@ public:
 		{
 			return first.GetData() < second.GetData();
 		};
+
+		
 
  
 
@@ -61,7 +82,7 @@ public:
 		while (!openSet.empty())
 		{
 			// TODO: Do it nicer , who is first? second? structure binding
-			auto currentNode = openSet.front();
+			auto currentNode = openSet.top();
 			auto&& [currentState, currentMoves] = currentNode;
 			openSet.pop();
 

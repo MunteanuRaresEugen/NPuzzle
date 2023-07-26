@@ -34,6 +34,11 @@ public:
         return m_data;
     }
 
+    Position2D GetPosition2D(size_t index) const
+    {
+        return { index / N, index % N };
+    }
+
     bool operator==(const State<N>& obj) const 
     {
         return obj.GetData() == this->GetData();
