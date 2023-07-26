@@ -6,93 +6,111 @@
 #include <iostream>
 #include <set>
 #include <queue>
+#include<unordered_set>
 
 class Solver
 {
 public:
-    template <class State_t>
-    static Moves SolveBFS(const State_t& initialState)
-    {
-        std::cout << "Solving..." << std::endl << initialState;
+	template <class State_t>
+	static Moves SolveBFS(const State_t& initialState)
+	{
+		std::cout << "Solving..." << std::endl << initialState;
 
-        Validate(initialState);
-        if (initialState.IsGoalState()) return {}; // no moves required. Initial state is goal state.
+		Validate(initialState);
+		if (initialState.IsGoalState()) return {}; // no moves required. Initial state is goal state.
 
-        using Node = std::pair<State_t, Moves>;
+		using Node = std::pair<State_t, Moves>;
 
 		//TODO: define OPEN SET correctly
 		std::queue<Node> openSet;
-        openSet.push({ initialState, {} });
+		openSet.push({ initialState, {} });
 
 		//TODO: define CLOSED SET correctly
 		//std::set<State_t> closedSet;
 
-        auto stateCompare = [](const State_t& first, const State_t& second) -> bool
-        {
-            return first.GetData() < second.GetData();
-        }; 
+		auto stateCompare = [](const State_t& first, const State_t& second) -> bool
+		{
+			return first.GetData() < second.GetData();
+		};
 
-		std::set<State_t, decltype(stateCompare)> closedSet(stateCompare);
+ 
+
+		//auto stateHash = [](const State_t& state) -> size_t
+		//{
+	//		const auto &reference = state.GetData();
+	//		size_t seed = reference.size();
+	//		for (auto& i : reference) {
+	//			seed ^= i + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	//		}
+	//		return seed;
+		//};
+
+		/*auto equalTo = [](const State_t& first, const State_t& second) -> bool
+		{
+			return first.GetData() == second.GetData();
+		};*/
+
+		//std::set<State_t, decltype(stateCompare)> closedSet(stateCompare);
+		std::unordered_set<State_t> closedSet;
 
 
+		// TODO: Create a comparator so std::set can work with the State instances.
+		// It doesn't really make sense to compare states otherwise...
 
-        // TODO: Create a comparator so std::set can work with the State instances.
-        // It doesn't really make sense to compare states otherwise...
-       
 
-        while (!openSet.empty())
-        {
+		while (!openSet.empty())
+		{
 			// TODO: Do it nicer , who is first? second? structure binding
-            auto currentNode = openSet.front();            
-            auto&& [currentState, currentMoves ]= currentNode;
-            openSet.pop();
+			auto currentNode = openSet.front();
+			auto&& [currentState, currentMoves] = currentNode;
+			openSet.pop();
 
-            // some logging
-            static size_t maxDepth = 0;
-            if (currentMoves.size() > maxDepth)
-            {
-                maxDepth = currentMoves.size();
-                std::cout << "Max Depth: " << maxDepth << std::endl;
-            }
-            // end logging
+			// some logging
+			static size_t maxDepth = 0;
+			if (currentMoves.size() > maxDepth)
+			{
+				maxDepth = currentMoves.size();
+				std::cout << "Max Depth: " << maxDepth << std::endl;
+			}
+			// end logging
 
-            if (currentState.IsGoalState())
-            {
-                std::cout << "Visited: " << closedSet.size() << std::endl;                
-                return currentMoves; // leaving cycle statement
-            }
+			if (currentState.IsGoalState())
+			{
+				std::cout << "Visited: " << closedSet.size() << std::endl;
+				return currentMoves; // leaving cycle statement
+			}
 
-            closedSet.insert(currentState);
+			closedSet.insert(currentState);
 
-            for (auto&& childMovePair : currentState.GetChildren())
-            {
+			for (auto&& childMovePair : currentState.GetChildren())
+			{
 				//TODO: Do it nicer - who is first? second? 
-                auto&& [childState, move] = childMovePair;
+				auto&& [childState, move] = childMovePair;
 
-				if(!closedSet.contains( childState)) // TODO: use C++20
-                {
-                    Moves childMoves = currentMoves;
-                    childMoves.push_back(move);
-                    openSet.push({ std::move(childState), std::move(childMoves) });
-                }
-            }
-        }
+				if (!closedSet.contains(childState)) // TODO: use C++20
+				{
+					Moves childMoves = currentMoves;
+					childMoves.push_back(move);
+					openSet.push({ std::move(childState), std::move(childMoves) });
+				}
+			}
+		}
 
-        throw std::runtime_error("Couldn't solve");
-    }
+		throw std::runtime_error("Couldn't solve");
+	}
 
 private:
 	//musthaveTODO implement Validate correctly
-    template <class State_t>
-    static void Validate(const State_t& state)
-    {   
-        if (!state.IsValid())
-        {
-            throw std::runtime_error("state not valid");
-        }
-        if (!state.IsSolvable())
-        {
-            throw std::runtime_error("state not solvable");
-        }
-    }
+	template <class State_t>
+	static void Validate(const State_t& state)
+	{
+		if (!state.IsValid())
+		{
+			throw std::runtime_error("state not valid");
+		}
+		if (!state.IsSolvable())
+		{
+			throw std::runtime_error("state not solvable");
+		}
+	}
 };

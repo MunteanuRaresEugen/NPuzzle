@@ -34,6 +34,11 @@ public:
         return m_data;
     }
 
+    bool operator==(const State<N>& obj) const 
+    {
+        return obj.GetData() == this->GetData();
+    }
+
     static const State GoalState()
     {
         // TODO: Refactor with STL --- checked        
@@ -293,6 +298,22 @@ std::ostream& operator<< (std::ostream& os, const State<N>& state)
     os << std::endl;
 
     return os;
+}
+
+namespace std
+{
+    template<size_t N>
+    struct hash<State<N>>
+    {
+        size_t operator()(const State<N> state) const
+        {
+            std::size_t seed = state.GetData().size();
+            for (auto& i : state.GetData()) {
+                seed ^= i + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            }
+            return seed;
+        }
+    };
 }
 
 using State3X3 = State<3>;
