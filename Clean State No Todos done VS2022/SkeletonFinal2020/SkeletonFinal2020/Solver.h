@@ -28,10 +28,16 @@ public:
 		{
 			int totaldistance = 0;
 			const auto& currentstate = node.first;
+			const auto& curentData = currentstate.GetData();
 			for (size_t i = 0; i < currentstate.GetData().size(); i++)
-			{
-				int currentdistance = std::abs((int)currentstate.GetPosition2D(i).second - (int)currentstate.GetPosition2D(currentstate.GetData()[i] - 1).second) + std::abs((int)currentstate.GetPosition2D(i).first - (int)currentstate.GetPosition2D(currentstate.GetData()[i] - 1).first);
-				totaldistance += currentdistance;
+			{	
+				if (curentData[i] != 0)
+				{
+					int currentdistance = std::abs((int)currentstate.GetPosition2D(i).second - (int)currentstate.GetPosition2D(curentData[i] - 1).second) + std::abs((int)currentstate.GetPosition2D(i).first - (int)currentstate.GetPosition2D(curentData[i] - 1).first);
+					totaldistance += currentdistance;
+					totaldistance += node.second.size();
+				}
+				
 			}
 
 			return totaldistance;
